@@ -215,7 +215,7 @@ export default class MISB0601Parser {
 
   private static parseBERLength(
     data: Uint8Array,
-    offset: number,
+    offset: number
   ): { length: number; bytesUsed: number } | null {
     if (offset >= data.length) return null;
     const b0 = data[offset];
@@ -258,7 +258,7 @@ export default class MISB0601Parser {
 
   private static parseTag(
     data: Uint8Array,
-    offset: number,
+    offset: number
   ): { tag: number; bytesUsed: number } | null {
     if (offset >= data.length) return null;
     const byte = data[offset];
@@ -268,7 +268,7 @@ export default class MISB0601Parser {
   private static decodeValue(
     result: MISB0601Data,
     tag: number,
-    data: Uint8Array,
+    data: Uint8Array
   ): void {
     const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
     switch (tag) {
@@ -559,8 +559,8 @@ export default class MISB0601Parser {
         break;
       default:
         result[`tag_${tag}`] = Array.from(data)
-          .map((b) => b.toString(16).padStart(2, '0'))
-          .join('');
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
     }
   }
 
@@ -579,21 +579,21 @@ export default class MISB0601Parser {
 
   private static decodeString(data: Uint8Array): string {
     // UTF-8 couvre ASCII/ISO-646
-    return new TextDecoder('utf-8').decode(data).trim();
+    return new TextDecoder("utf-8").decode(data).trim();
   }
 
   private static decodeAngle(
     data: Uint8Array,
     min: number,
-    max: number,
-  ): number | null {
+    max: number
+  ): number | undefined {
     const len = data.length;
     let raw = 0;
     for (const b of data) raw = (raw << 8) | b;
 
     const bitLen = len * 8;
     const errorCode = 1 << (bitLen - 1);
-    if (raw === errorCode) return null;
+    if (raw === errorCode) return undefined;
 
     const isSigned = min === -max;
     if (isSigned) {
@@ -609,13 +609,13 @@ export default class MISB0601Parser {
 
   private static decodeCoordinate(
     data: Uint8Array,
-    isLatitude: boolean,
-  ): number | null {
+    isLatitude: boolean
+  ): number | undefined {
     let raw = 0;
     for (const b of data) raw = (raw << 8) | b;
 
     const errorCode = 0x80000000;
-    if (raw === errorCode) return null;
+    if (raw === errorCode) return undefined;
 
     const signed = raw & errorCode ? raw - 0x100000000 : raw;
 
@@ -641,7 +641,7 @@ export default class MISB0601Parser {
 
 /** convertit une chaîne hex en Uint8Array */
 export const parseHexString = (hex: string): Uint8Array | null => {
-  const cleaned = hex.replace(/\s+/g, '');
+  const cleaned = hex.replace(/\s+/g, "");
   if (cleaned.length % 2 !== 0) return null;
   const bytes = new Uint8Array(cleaned.length / 2);
   for (let i = 0; i < cleaned.length; i += 2) {
